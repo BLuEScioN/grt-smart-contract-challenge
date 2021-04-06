@@ -1,43 +1,47 @@
-Challenge 1
-Setup a project and create a contract
-DAIPool provides a service where people can deposit DAI and they will receive weekly rewards. 
-Users must be able to take out their deposits along with the accrued rewards at any time. 
-Rewards are deposited into the pool by the DAIPool team each week (i.e. it is a trusted setup).
+DaiPool Staking Contract
 
-Design and code a contract for DAIPool, take all the assumptions you need to move forward.
+Putting the name aside, DaiPool is a general smart contract for staking an ERC20 token and earning rewards in ERC20 tokens. 
 
-You can use any development tools you prefer: Hardhat, Truffle, Brownie.
+Setup
 
-You can find testnet versions of DAI at the following addresses:
+Create a .env.js file. This file will hold sensitive information about the wallet that you will need to use to send transactions. It will take the form:
 
-Goerli at 0xF2D1F94310823FE26cFa9c9B6fD152834b8E7849
-Kovan at 0x7d669A64deb8a4A51eEa755bb0E19FD39CE25Ae9
-Rinkeby at 0xc3dbf84Abb494ce5199D5d4D815b10EC29529ff8
-Ropsten at 0x2D69aD895797C880abce92437788047BA0Eb7fF6
+module.exports = {
+  infuraKey: '<infuraKey>',
+  mnemonic: '<mnemonic>'
+};
 
-My Notes
-Rewards are deposited into the pool by the DAIPool team each week => There is a set amount of rewards per week and the rewards will be divided among the stakers in proportion to the amount of tokens they have staked relative to the total supply of tokens staked
+Replace <infuraKey> and <mnemonic> with your own Infura key and MetaMask wallet mnemonic, respectively. 
 
-Deploy your contract
-Deploy the contract to any Ethereum testnet of your preference. Keep record of the deployed address.
+Deploy the DaiPool Contract to some Ethereum network. Rinkeby, for example. Run 'truffle migrate --network rinkeby'.
 
-Interact with the contract
-Create a script to query the total amount of tokens held in the contract and the deposited rewards.
+You can modify the initialization parameters for the DaiPool Contract in 1_inital_migration.js
 
-You can use any library you prefer: Ethers.js, Web3.js, Web3.py
+This is the constructor for the DaiPool contract:
 
-My Notes
-Write a Node.js script. Set up web3. Declare and initialize smart contract. Call smart contract methods for answers: TVL + deposited rewards
+constructor(
+    address _owner,
+    address _rewardsDistribution,
+    address _stakingToken,
+    address _rewardsToken
+) Owned(_owner) {
+    stakingToken = IERC20(_stakingToken);
+    rewardsToken = IERC20Burnable(_rewardsToken);
+    rewardsDistribution = _rewardsDistribution; // the wallet that provides the rewards 
+}
 
-Challenge 2
-Review a contract from the Graph Protocol
-The Graph Protocol is comprised of a number of core contracts that coordinates multiple stakeholders, providing them economic incentives for their participation.
+Set _owner and_rewardsDistribution to the wallet address from which you will be deploying the contract.
+Set _stakingToken to the ERC20 that users will be required to stake to earn the reward token. 
+This can be any ERC20 token. Note that in order to stake you will have to approve the DaiPool contract to spend your wallet's ERC20 tokens.
+You can do this through Remix, Etherscan, your own front-end, etc. There is a front-end built just for this purpose in this repo (although you will have to find and replace some address values to get it to work for your specific needs).
+To build the front-end, run 'npm run build'.
+To serve the front-end on localhost, run 'npm run dev'.
+Set the _rewardToken to the ERC20 that users will be rewarded for staking the _stakingToken. I wrote a Cookie ERC20 contract that you can use for the reward token if you wish. Deploying it with your wallet with give you the total supply of the token,
+which will make it easier to finish setting up the DaiPool contract.
 
-In this link https://github.com/graphprotocol/contracts you will find the full set of core Graph Protocol contracts.
+Send whatever ERC20 token you want for the reward token to the DaiPool contract.
+Then call the DaiPool contract's notifyRewardAmount, and specify a reward less than or equal to the number of tokens you sent for this purpose.
 
-For the purpose of the interview we will discuss the following contract: https://github.com/graphprotocol/contracts/blob/master/contracts/curation/Curation.sol
+After calling notifyRewardAmount, the DaiPool contract will be set up and active.
 
-Take some time to review the code, understand what the contract is doing and be prepared to discuss it during the interview.
-
-Setup and organization
-You can work on a private GitHub repo in and then share it with ariel@edgeandnode.com and david@edgeandnode.com
+There is also a node js script, DaiPoolScript that you can modify to your needs if you want to query your contracts.
