@@ -1,6 +1,7 @@
 node_modules
 build
 .secret
+.env.js
 
 # misc
 .DS_Store
